@@ -3,12 +3,9 @@ from odoo import api, fields, models, SUPERUSER_ID, _
 from odoo.exceptions import UserError
 from odoo.tools import float_is_zero, float_compare, DEFAULT_SERVER_DATETIME_FORMAT
 import json
-class PurchaseOrder(models.Model):
-    
-    _inherit = 'purchase.order'
 
 
-    state = fields.Selection([
+select=[
         ('draft', 'Quotation'),
         ('sent', 'RFQ Sent'),
         ('first_approval', 'Approval 1'),
@@ -19,10 +16,21 @@ class PurchaseOrder(models.Model):
         ('purchase', 'Purchase Order'),
         ('done', 'Locked'),
         ('cancel', 'Cancelled')
-    ], string='Status', readonly=True, index=True, copy=False, default='draft', tracking=True)
+    ]
 
-  
+class PurchaseOrder(models.Model):
+    
+    _inherit = 'purchase.order'
+
+
+    state = fields.Selection(select, string='Status', readonly=True, index=True, copy=False, default='draft', tracking=True)
+    state2=fields.Selection(select, string='Status', readonly=True, index=True, copy=False, default='draft', tracking=True)
+    
+    approval=fields.Boolean(string="Approval Status",compute="approval_computed")
     total_min_amount=fields.Monetary(compute="computed_amont",readonly=True)
+    
+  
+            
     @api.depends("total_min_amount") 
     def computed_amont(self):
          
@@ -35,63 +43,73 @@ class PurchaseOrder(models.Model):
         
        
 
-        return self.write({'state': 'first_approval'})
+        
+        return self.write({'state': 'first_approval'}),self.write({'state2': 'first_approval'})
+        
+        
     # def operation_send_approve(self):
     #     return self.write({'state': 'first_approval'})
     
 
-    def first_approval(self):
+    def first_approval_button(self):
          
       
       
       
-      self.write({'state': 'second_approval'})
+     return self.write({'state': 'second_approval'}),self.write({'state2': 'second_approval'})
       
             
-    # def first_approval(self):
-    #     return self.write({'state': 'second_approval'})
-    
+
     def first_approval_reject(self):
        
 
         return self.write({'state': 'cancel'})
-    
-    def second_approval(self):
+    # @api.depends('approval')
+    def approval_computed(self):
         if self.amount_total >= self.total_min_amount:
-
-          self.write({'state': 'third_approval'})
+            self.approval = True
         else:
-          self.write({'state': 'purchase'})
+            self.approval = False    
+    
+    def second_approval_button(self):
+        
+        if self.approval == True:
+            
+
+            return  self.write({'state': 'third_approval'}),self.write({'state2': 'third_approval'})
+        else:
+          
+          return  self.write({'state': 'purchase'}),self.write({'state2':'purchase'})
     
     def second_approval_reject(self):
        
 
-        return self.write({'state': 'cancel'})
+        return self.write({'state': 'cancel'}),self.write({'state2': 'cancel'})
     
-    def third_approval(self):
+    def third_approval_button(self):
         
 
-        return self.write({'state': 'fourth_approval'})
+        return self.write({'state': 'fourth_approval'}),self.write({'state2': 'fourth_approval'})
    
     
     def third_approval_reject(self):
         
 
-        return self.write({'state': 'cancel'})
+        return self.write({'state': 'cancel'}),self.write({'state2': 'cancel'})
     
-    def fourth_approval(self):
+    def fourth_approval_button(self):
         
-        return self.write({'state': 'purchase'})
+        return self.write({'state': 'purchase'}),self.write({'state2': 'purchase'})
     
     
     def fourth_approval_reject(self):
         
 
-        return self.write({'state': 'cancel'})
+        return self.write({'state': 'cancel'}),self.write({'state2': 'cancel'})
     def button_confirm(self):
 
         for order in self:
-            if order.state not in ['draft', 'sent', 'purchase',]:
+            if order.state not in ['draft', 'sent','purchase' ]:
                 continue
             order._add_supplier_to_product()
             # Deal with double validation process
@@ -107,4 +125,3 @@ class PurchaseOrder(models.Model):
 
 
     #Sree Joaynto Chandro Barmon
-
