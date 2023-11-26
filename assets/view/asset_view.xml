@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_account_asset_form_inherit_asset" model="ir.ui.view">
+        <field name="name">account.asset.view.form.inherit</field>
+        <field name="model">account.asset</field>
+        <field name="inherit_id" ref="account_asset.view_account_asset_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page  string="Cranes Information">
+                <group >
+                  <group>
+                    <field name="serial_no" />
+                    <field name="manufacturer" />
+                  </group>
+                   <group >
+                    <field name="class_code" />
+                    <field name="supclass_code" />
+                   </group>
+                    
+                </group>
+                   
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+
+
+   <record id="product_template_only_form_view_inherit_asset" model="ir.ui.view">
+    <field name="name">product.template.view.form.inherit</field>
+    <field name="model">product.template</field>
+    <field name="inherit_id" ref="product.product_template_only_form_view"/>
+    <field name="arch" type="xml">
+        <xpath expr="//notebook " position="inside">
+           <page  string="Cranes Information">
+                <group >
+                  <group>
+                    <field name="product_group_code" />
+                    <field name="capacity_code" />
+                  </group>
+                   <group >
+                    <field name="manufacturer_code" />
+                    <field name="manufacturer" />
+                    <field name="serial_no" />
+                   </group>
+                    
+                </group>
+                   
+                </page>
+            
+        </xpath>
+         <xpath expr="//label[@for='standard_price']" position="replace">
+         <label for="cost" string="Cost"/>
+         </xpath>
+        <xpath expr="//field[@name='standard_price']" position="replace">
+         <field name="cost" />
+        
+     
+        </xpath>
+
+    </field>
+   </record>
+</odoo>
